@@ -15,5 +15,8 @@
 
 .config.toml
 resolver
-
+featws-resolver-geolite
 .env
+
+city-state.csv
+Geolite2-City.mmdb

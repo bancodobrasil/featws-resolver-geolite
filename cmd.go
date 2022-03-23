@@ -20,8 +20,8 @@ created with golang employed in the FeatWS ecosystem.`,
 	}
 	serveCmd = &cobra.Command{
 		Use:   "serve",
-		Short: "start resolver",
-		Long:  `Starts the resolver and serves rulles related`,
+		Short: "Starts resolver",
+		Long:  `Starts the resolver's server to handle ruller requests`,
 		Run: func(cmd *cobra.Command, args []string) {
 			Init()
 		},
@@ -37,8 +37,12 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
-	rootCmd.PersistentFlags().Bool("debug", false, "debug server")
-	viper.BindPFlag("log.debug-mode", rootCmd.PersistentFlags().Lookup("debug"))
+	rootCmd.PersistentFlags().StringP("geo-database-file", "g", "", "Geolite database file path")
+	rootCmd.PersistentFlags().StringP("cities-database-file", "c", "", "Cities database file path")
+	rootCmd.PersistentFlags().StringP("server-port", "p", "", "Server port listening")
+	viper.BindPFlag("DATABASE_GEOLITE2", rootCmd.PersistentFlags().Lookup("geo-database-file"))
+	viper.BindPFlag("DATABASE_CITYSTATE", rootCmd.PersistentFlags().Lookup("cities-database-file"))
+	viper.BindPFlag("SERVER_PORT", rootCmd.PersistentFlags().Lookup("server-port"))
 	rootCmd.AddCommand(serveCmd)
 }
 
@@ -50,8 +54,8 @@ func initConfig() {
 		cobra.CheckErr(err)
 		exePath := filepath.Dir(ex)
 		viper.AddConfigPath(exePath)
-		viper.SetConfigType("toml")
-		viper.SetConfigName(".config")
+		viper.SetConfigType("env")
+		viper.SetConfigName(".env")
 	}
 
 	replacer := strings.NewReplacer(".", "_")

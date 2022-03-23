@@ -3,9 +3,9 @@ FROM golang:1.18-alpine AS BUILD
 WORKDIR /opt
 
 # download db if arg is not empty
-ARG MAXMIND_LICENSE_KEY
-ADD /scripts/download-databases.sh /opt/
-RUN /opt/download-databases.sh $MAXMIND_LICENSE_KEY
+ARG FEATWS_GEOLITE_TOKEN
+ADD /database/download-databases.sh /opt/
+RUN /opt/download-databases.sh $FEATWS_GEOLITE_TOKEN
 
 WORKDIR /app
 

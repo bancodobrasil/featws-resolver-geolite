@@ -13,10 +13,10 @@ type Config struct {
 
 func LoadConfig() *Config {
 	return &Config{
-		Port: viper.GetString("server.port"),
+		Port: viper.GetString("SERVER_PORT"),
 
-		GeoLite2DB:  viper.GetString("database.geolite2"),
-		CityStateDB: viper.GetString("database.citystate"),
+		GeoLite2DB:  viper.GetString("DATABASE_GEOLITE2"),
+		CityStateDB: viper.GetString("DATABASE_CITYSTATE"),
 	}
 
 }
