@@ -1,0 +1,12 @@
+version: "3.6"
+services:
+  resolver:
+    build: .
+    environment:
+      - PORT=7000
+    ports:
+      - 7000:7000
+    expose:
+      - 7000
+    env_file:
+      - .env

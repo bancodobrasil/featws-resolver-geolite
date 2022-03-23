@@ -1,0 +1,9 @@
+app-name = "resolver-geolite"
+version = 1.0
+
+[server]
+port = 7000
+
+[database]
+geolite2 = "localhost"
+citystate = "5432"
