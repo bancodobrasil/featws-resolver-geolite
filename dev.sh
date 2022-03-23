@@ -1,3 +1,3 @@
 #!/bin/bash
 
-go build -o resolver && ./resolver
+go build -o resolver && ./resolver serve

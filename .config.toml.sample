@@ -1,0 +1,11 @@
+app-name = "resolver-geolite"
+version = 1.0
+
+[server]
+# Server port that listens for requests 
+port = 7000
+
+# Replace <folder_database> with the actual path to load the databases 
+[database]
+geolite2 = "<folder_database>/Geolite2-City.mmdb"
+citystate = "<folder_database>/city-state.csv"
