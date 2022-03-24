@@ -17,6 +17,7 @@
 resolver
 featws-resolver-geolite
 .env
+temp
 
 city-state.csv
 Geolite2-City.mmdb

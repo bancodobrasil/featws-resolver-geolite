@@ -9,7 +9,7 @@ else
   curl "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=$FEATWS_GEOLITE_TOKEN&suffix=tar.gz" \
     --output GeoLite2-City.tar.gz
 
-  mkdir temp
+  mkdir -p temp
   tar -xvf GeoLite2-City.tar.gz -C temp
   mv temp/*/GeoLite2-City.mmdb Geolite2-City.mmdb
   rm -rf temp

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"sort"
 
 	adapter "github.com/bancodobrasil/featws-resolver-adapter-go"
@@ -13,13 +12,14 @@ var geoIPDatabase *GeoIPDatabase
 
 func Init() {
 	config := LoadConfig()
-	log.Println("Recovering geo database...")
+	logger.Info("Recovering geo database...")
 	db, err := NewDatabase(config)
+
 	if err != nil {
-		log.Fatalf("Couldn't connect to database. Error: %s", err)
+		logger.Fatalf("Couldn't connect to database. Error: %s", err)
 	}
 	geoIPDatabase = db
-	log.Println("configuring resolver...")
+	logger.Info("configuring resolver...")
 	adapter.Run(resolver, adapter.Config{
 		Port: config.Port,
 	})
@@ -34,7 +34,7 @@ func resolver(resolveInput types.ResolveInput, resolveOutput *types.ResolveOutpu
 
 func resolveGeoIp(resolveInput types.ResolveInput, output *types.ResolveOutput) {
 	remoteIP, ok := resolveInput.Context["remote_ip"]
-	log.Printf("Finding data for remote ip %s", remoteIP)
+	logger.Debugf("Finding data for remote ip %s", remoteIP)
 	if !ok {
 		output.Errors["geoip"] = "The context 'remote_ip' is required to resolve 'geoip'"
 	} else {

@@ -1,12 +1,11 @@
-version: "3.6"
+version: "3.8"
 services:
   resolver:
     build: .
     environment:
-      - PORT=7000
+      - GIN_MODE=debug
+      - LOG_LEVEL=debug
     ports:
       - 7000:7000
-    expose:
-      - 7000
     env_file:
       - .env

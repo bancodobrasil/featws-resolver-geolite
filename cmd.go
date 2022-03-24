@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -40,9 +39,13 @@ func init() {
 	rootCmd.PersistentFlags().StringP("geo-database-file", "g", "", "Geolite database file path")
 	rootCmd.PersistentFlags().StringP("cities-database-file", "c", "", "Cities database file path")
 	rootCmd.PersistentFlags().StringP("server-port", "p", "", "Server port listening")
+	rootCmd.PersistentFlags().BoolP("log-json", "j", false, "Log format json (default is false)")
+	rootCmd.PersistentFlags().StringP("log-level", "l", "error", "Log level (default is error)")
 	viper.BindPFlag("DATABASE_GEOLITE2", rootCmd.PersistentFlags().Lookup("geo-database-file"))
 	viper.BindPFlag("DATABASE_CITYSTATE", rootCmd.PersistentFlags().Lookup("cities-database-file"))
 	viper.BindPFlag("SERVER_PORT", rootCmd.PersistentFlags().Lookup("server-port"))
+	viper.BindPFlag("LOG_JSON", rootCmd.PersistentFlags().Lookup("log-json"))
+	viper.BindPFlag("LOG_LEVEL", rootCmd.PersistentFlags().Lookup("log-level"))
 	rootCmd.AddCommand(serveCmd)
 }
 
@@ -61,9 +64,9 @@ func initConfig() {
 	replacer := strings.NewReplacer(".", "_")
 	viper.SetEnvKeyReplacer(replacer)
 	viper.AutomaticEnv()
-
+	InitLogger()
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file: ", viper.ConfigFileUsed())
+		logger.Infof("Using config file: %s", viper.ConfigFileUsed())
 	}
 
 }

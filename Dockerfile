@@ -1,23 +1,33 @@
 FROM golang:1.18-alpine AS BUILD
 
+RUN apk add curl
+
 WORKDIR /opt
 
 # download db if arg is not empty
 ARG FEATWS_GEOLITE_TOKEN
-ADD /database/download-databases.sh /opt/
-RUN /opt/download-databases.sh $FEATWS_GEOLITE_TOKEN
+COPY scripts/download-databases.sh .
+RUN ./download-databases.sh $FEATWS_GEOLITE_TOKEN
 
+# build app
 WORKDIR /app
 
 COPY go.* /app/
-RUN go mod download
+RUN go mod download -x
 
-COPY . /app/
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags="-w -s" -o resolver
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags="-w -s" -o /resolver-geolite
-
+# pack binary
 FROM alpine:3.15
 
-COPY --from=BUILD /app/resolver-geolite /bin/
+ENV LOG_LEVEL=error
+ENV SERVER_PORT=7000
 
-CMD [ "resolver-geolite serve" ]
+COPY --from=BUILD /opt/ /opt/
+COPY --from=BUILD /app/resolver /bin/
+COPY scripts/startup.sh /
+
+EXPOSE 7000
+
+CMD [ "/startup.sh" ]

@@ -4,14 +4,12 @@ import (
 	"bufio"
 	"encoding/csv"
 	"io"
-	"log"
 	"net"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/oschwald/geoip2-golang"
-	"github.com/sirupsen/logrus"
 )
 
 type GeoIPDatabase struct {
@@ -41,24 +39,24 @@ func NewDatabase(config *Config) (*GeoIPDatabase, error) {
 	geoIPDatabase := GeoIPDatabase{}
 
 	if getLite2DbFile == "" {
-		logrus.Infof("Geolite database file not found. Localization capabilities based on IP will be disabled")
+		logger.Infof("Geolite database file not found. Localization capabilities based on IP will be disabled")
 	} else {
-		logrus.Debugf("Loading GeoIP2 database %s", getLite2DbFile)
+		logger.Debugf("Loading GeoIP2 database %s", getLite2DbFile)
 		gdb, err := geoip2.Open(getLite2DbFile)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 		geoIPDatabase.GeoDb = gdb
 
-		logrus.Infof("GeoIP2 database loaded")
+		logger.Infof("GeoIP2 database loaded")
 
 		if cityStateDbFile == "" {
-			logrus.Infof("City State csv file not defined. _ip_state input won't be available")
+			logger.Infof("City State csv file not defined. City input won't be available")
 		} else {
-			logrus.Debugf("Loading City State CSV file %s", cityStateDbFile)
+			logger.Debugf("Loading City State CSV file %s", cityStateDbFile)
 			csvFile, err := os.Open(cityStateDbFile)
 			if err != nil {
-				log.Fatal(err)
+				logger.Fatal(err)
 			}
 			geoIPDatabase.CityState = make(map[string]map[string]string)
 			reader := csv.NewReader(bufio.NewReader(csvFile))
@@ -67,7 +65,7 @@ func NewDatabase(config *Config) (*GeoIPDatabase, error) {
 				if err == io.EOF {
 					break
 				} else if err != nil {
-					log.Fatal(err)
+					logger.Fatal(err)
 				}
 				country := strings.ToLower(line[0])
 				city := strings.ToLower(line[1])
@@ -79,7 +77,7 @@ func NewDatabase(config *Config) (*GeoIPDatabase, error) {
 				}
 				cm[city] = state
 			}
-			logrus.Infof("City State CSV loaded")
+			logger.Infof("City State CSV loaded")
 		}
 	}
 	return &geoIPDatabase, nil
@@ -89,9 +87,9 @@ func (g *GeoIPDatabase) Find(ipStr string) (*GeoRecord, error) {
 	ip := net.ParseIP(ipStr)
 	start := time.Now()
 	ipRecord, err := g.GeoDb.City(ip)
-	log.Printf("Time to find getIp data: %s", time.Since(start))
+	logger.Debugf("Time to find getIp data: %s", time.Since(start))
 	if err != nil {
-		log.Println("Couldn't find geo info for ip %s. err=%s", ipStr, err)
+		logger.Debugf("Couldn't find geo info for ip %s. err=%s", ipStr, err)
 		return nil, err
 	} else {
 		geoRecord := &GeoRecord{
@@ -103,8 +101,6 @@ func (g *GeoIPDatabase) Find(ipStr string) (*GeoRecord, error) {
 				AccuracyRadius: ipRecord.Location.AccuracyRadius,
 			},
 		}
-
-		//get state from city name
 		cs, exists := g.CityState[strings.ToLower(ipRecord.Country.IsoCode)]
 		if exists {
 			state, exists := cs[strings.ToLower(ipRecord.City.Names["en"])]

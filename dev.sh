@@ -1,4 +1,7 @@
 #!/bin/bash
+set -e
+set -a
+
 source .env
 
 if [[ -z $DATABASE_GEOLITE2 ]]; then
@@ -17,9 +20,9 @@ if [[ -z $FEATWS_GEOLITE_TOKEN ]]; then
 fi
 
 if [[ ! -f "$DATABASE_GEOLITE2" || ! -f "$DATABASE_CITYSTATE"  ]]; then
-  echo "> Downloading databases..."
-  ./database/download-databases.sh $FEATWS_GEOLITE_TOKEN
-  echo "> Finished!"
+  echo "Downloading databases..."
+  scripts/download-databases.sh $FEATWS_GEOLITE_TOKEN
+  echo "Finished!"
 fi
 
-go build -o resolver && ./resolver serve
+go build -o resolver && ./resolver serve --log-level debug
