@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"errors"
+	"fmt"
 	"io"
 	"net"
 	"os"
@@ -27,7 +29,7 @@ type GeoRecord struct {
 	RemoteIp string            `json:"remote_ip"`
 	Country  string            `json:"country"`
 	City     string            `json:"city"`
-	State    string            `json:"state"`
+	State    string            `json:"state,omitempty"`
 	Location GeoRecordLocation `json:"location"`
 }
 
@@ -39,12 +41,12 @@ func NewDatabase(config *Config) (*GeoIPDatabase, error) {
 	geoIPDatabase := GeoIPDatabase{}
 
 	if getLite2DbFile == "" {
-		logger.Infof("Geolite database file not found. Localization capabilities based on IP will be disabled")
+		return nil, errors.New("Geolite database file not defined")
 	} else {
 		logger.Debugf("Loading GeoIP2 database %s", getLite2DbFile)
 		gdb, err := geoip2.Open(getLite2DbFile)
 		if err != nil {
-			logger.Fatal(err)
+			return nil, err
 		}
 		geoIPDatabase.GeoDb = gdb
 
@@ -79,38 +81,45 @@ func NewDatabase(config *Config) (*GeoIPDatabase, error) {
 			}
 			logger.Infof("City State CSV loaded")
 		}
+		return &geoIPDatabase, nil
 	}
-	return &geoIPDatabase, nil
 }
 
 func (g *GeoIPDatabase) Find(ipStr string) (*GeoRecord, error) {
-	ip := net.ParseIP(ipStr)
-	start := time.Now()
-	ipRecord, err := g.GeoDb.City(ip)
-	logger.Debugf("Time to find getIp data: %s", time.Since(start))
-	if err != nil {
-		logger.Debugf("Couldn't find geo info for ip %s. err=%s", ipStr, err)
-		return nil, err
-	} else {
-		geoRecord := &GeoRecord{
-			Country: ipRecord.Country.Names["en"],
-			City:    ipRecord.City.Names["en"],
-			Location: GeoRecordLocation{
-				Latitude:       ipRecord.Location.Latitude,
-				Longitude:      ipRecord.Location.Longitude,
-				AccuracyRadius: ipRecord.Location.AccuracyRadius,
-			},
-		}
-		cs, exists := g.CityState[strings.ToLower(ipRecord.Country.IsoCode)]
-		if exists {
-			state, exists := cs[strings.ToLower(ipRecord.City.Names["en"])]
-			if exists {
-				geoRecord.State = state
+	if g.GeoDb != nil {
+		ip := net.ParseIP(ipStr)
+		start := time.Now()
+		ipRecord, err := g.GeoDb.City(ip)
+		logger.Debugf("Time to find getIp data: %s", time.Since(start))
+		if err != nil {
+			errStr := fmt.Sprintf("Couldn't find geo info for ip %s. err=%s", ipStr, err)
+			logger.Debugf(errStr)
+			return nil, errors.New(errStr)
+		} else {
+			geoRecord := &GeoRecord{
+				RemoteIp: ipStr,
+				Country:  ipRecord.Country.Names["en"],
+				City:     ipRecord.City.Names["en"],
+				Location: GeoRecordLocation{
+					Latitude:       ipRecord.Location.Latitude,
+					Longitude:      ipRecord.Location.Longitude,
+					AccuracyRadius: ipRecord.Location.AccuracyRadius,
+				},
 			}
+			if g.CityState != nil {
+				cs, exists := g.CityState[strings.ToLower(ipRecord.Country.IsoCode)]
+				if exists {
+					state, exists := cs[strings.ToLower(ipRecord.City.Names["en"])]
+					if exists {
+						geoRecord.State = state
+					}
+				}
+			}
+			return geoRecord, nil
 		}
-		return geoRecord, nil
+	} else {
+		return nil, errors.New("No geolite database")
 	}
-
 }
 
 func (g *GeoIPDatabase) Close() error {

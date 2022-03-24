@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sort"
 
 	adapter "github.com/bancodobrasil/featws-resolver-adapter-go"
@@ -38,11 +37,9 @@ func resolveGeoIp(resolveInput types.ResolveInput, output *types.ResolveOutput) 
 	if !ok {
 		output.Errors["geoip"] = "The context 'remote_ip' is required to resolve 'geoip'"
 	} else {
-		remoteIPStr := fmt.Sprintf("%v", remoteIP)
-		geoRecord, err := geoIPDatabase.Find(remoteIPStr)
-		geoRecord.RemoteIp = remoteIPStr
+		geoRecord, err := geoIPDatabase.Find(remoteIP.(string))
 		if err != nil {
-			output.Errors["geoip"] = err
+			output.Errors["geoip"] = err.Error()
 		} else {
 			output.Context["geoip"] = geoRecord
 		}
