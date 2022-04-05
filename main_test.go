@@ -1,12 +1,9 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
-
-	"github.com/sirupsen/logrus"
 )
 
 func TestMain(m *testing.M) {
@@ -17,9 +14,6 @@ func TestMain(m *testing.M) {
 }
 
 func setup() {
-	logger = logrus.New()
-	logger.Out = ioutil.Discard
-
 	config := &Config{
 		GeoLite2DB: "test-data/test-data/GeoLite2-City-Test.mmdb",
 	}
