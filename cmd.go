@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -27,6 +28,7 @@ created with golang employed in the FeatWS ecosystem.`,
 	}
 )
 
+// Execute ...
 func Execute() {
 	err := rootCmd.Execute()
 	cobra.CheckErr(err)
@@ -44,8 +46,6 @@ func init() {
 	viper.BindPFlag("DATABASE_GEOLITE2", rootCmd.PersistentFlags().Lookup("geo-database-file"))
 	viper.BindPFlag("DATABASE_CITYSTATE", rootCmd.PersistentFlags().Lookup("cities-database-file"))
 	viper.BindPFlag("SERVER_PORT", rootCmd.PersistentFlags().Lookup("server-port"))
-	viper.BindPFlag("LOG_JSON", rootCmd.PersistentFlags().Lookup("log-json"))
-	viper.BindPFlag("LOG_LEVEL", rootCmd.PersistentFlags().Lookup("log-level"))
 	rootCmd.AddCommand(serveCmd)
 }
 
@@ -64,9 +64,8 @@ func initConfig() {
 	replacer := strings.NewReplacer(".", "_")
 	viper.SetEnvKeyReplacer(replacer)
 	viper.AutomaticEnv()
-	InitLogger()
 	if err := viper.ReadInConfig(); err == nil {
-		logger.Infof("Using config file: %s", viper.ConfigFileUsed())
+		log.Infof("Resover geolite using config file: %s", viper.ConfigFileUsed())
 	}
 
 }

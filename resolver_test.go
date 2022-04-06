@@ -32,7 +32,7 @@ func TestValidIPs(t *testing.T) {
 				t.Errorf("got error %v", output.Errors)
 			} else {
 				geoRecord := output.Context["geoip"].(*GeoRecord)
-				assert.Equal(t, param.ipStr, geoRecord.RemoteIp)
+				assert.Equal(t, param.ipStr, geoRecord.RemoteIP)
 				assert.Equal(t, "United Kingdom", geoRecord.Country)
 				assert.Equal(t, "London", geoRecord.City)
 				assert.Equal(t, float64(51.5142), geoRecord.Location.Latitude)

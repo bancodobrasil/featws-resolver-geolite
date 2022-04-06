@@ -5,20 +5,22 @@ import (
 
 	adapter "github.com/bancodobrasil/featws-resolver-adapter-go"
 	"github.com/bancodobrasil/featws-resolver-adapter-go/types"
+	log "github.com/sirupsen/logrus"
 )
 
 var geoIPDatabase *GeoIPDatabase
 
+// Init ...
 func Init() {
 	config := LoadConfig()
-	logger.Info("Recovering geo database...")
+	log.Info("Recovering geo database...")
 	db, err := NewDatabase(config)
 
 	if err != nil {
-		logger.Fatalf("Couldn't connect to database. Error: %s", err)
+		log.Fatalf("Couldn't connect to database. Error: %s", err)
 	}
 	geoIPDatabase = db
-	logger.Info("configuring resolver...")
+	log.Infof("Running resolver on port %s ...", config.Port)
 	adapter.Run(resolver, adapter.Config{
 		Port: config.Port,
 	})
@@ -27,13 +29,13 @@ func Init() {
 func resolver(resolveInput types.ResolveInput, resolveOutput *types.ResolveOutput) {
 	sort.Strings(resolveInput.Load)
 	if contains(resolveInput.Load, "geoip") {
-		resolveGeoIp(resolveInput, resolveOutput)
+		resolveGeoIP(resolveInput, resolveOutput)
 	}
 }
 
-func resolveGeoIp(resolveInput types.ResolveInput, output *types.ResolveOutput) {
+func resolveGeoIP(resolveInput types.ResolveInput, output *types.ResolveOutput) {
 	remoteIP, ok := resolveInput.Context["remote_ip"]
-	logger.Debugf("Finding data for remote ip %s", remoteIP)
+	log.Debugf("Finding data for remote ip %s", remoteIP)
 	if !ok {
 		output.Errors["geoip"] = "The context 'remote_ip' is required to resolve 'geoip'"
 	} else {

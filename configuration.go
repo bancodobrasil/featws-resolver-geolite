@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Config ...
 type Config struct {
 	Port string
 
@@ -11,6 +12,7 @@ type Config struct {
 	CityStateDB string
 }
 
+// LoadConfig ...
 func LoadConfig() *Config {
 	return &Config{
 		Port: viper.GetString("SERVER_PORT"),

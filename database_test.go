@@ -15,7 +15,7 @@ func TestValidDatabase(t *testing.T) {
 	ipStr := "81.2.69.142"
 	geoRecord, err := db.Find(ipStr)
 	assert.NoError(t, err)
-	assert.Equal(t, ipStr, geoRecord.RemoteIp)
+	assert.Equal(t, ipStr, geoRecord.RemoteIP)
 	assert.Equal(t, "United Kingdom", geoRecord.Country)
 	assert.Equal(t, "London", geoRecord.City)
 	assert.Equal(t, float64(51.5142), geoRecord.Location.Latitude)

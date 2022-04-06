@@ -4,7 +4,9 @@ services:
     build: .
     environment:
       - GIN_MODE=debug
-      - LOG_LEVEL=debug
+      - RESOLVER_LOG_LEVEL=debug
+      - RESOLVER_SERVICE_NAME=resoverGeolite
+      - TELEMETRY_DISABLED=true
     ports:
       - 7000:7000
     env_file:
