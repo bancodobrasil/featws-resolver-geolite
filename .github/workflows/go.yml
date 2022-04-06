@@ -20,6 +20,8 @@ jobs:
         os: [ubuntu-latest, windows-latest, macOS-latest]
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: true
 
     - name: Set up Go
       uses: actions/setup-go@v2
