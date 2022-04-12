@@ -55,7 +55,7 @@ func resolveUF(resolveInput types.ResolveInput, output *types.ResolveOutput) {
 	remoteIP, ok := resolveInput.Context["remote_ip"]
 	log.Debugf("Finding data for remote ip %s", remoteIP)
 	if !ok {
-		output.Errors["uf"] = "The context 'remote_ip' is required to resolve 'geoip'"
+		output.Errors["uf"] = "The context 'remote_ip' is required to resolve 'uf'"
 	} else {
 		geoRecord, err := geoIPDatabase.Find(remoteIP.(string))
 		if err != nil {
