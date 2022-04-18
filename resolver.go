@@ -31,6 +31,9 @@ func resolver(resolveInput types.ResolveInput, resolveOutput *types.ResolveOutpu
 	if contains(resolveInput.Load, "geoip") {
 		resolveGeoIP(resolveInput, resolveOutput)
 	}
+	if contains(resolveInput.Load, "uf") {
+		resolveUF(resolveInput, resolveOutput)
+	}
 }
 
 func resolveGeoIP(resolveInput types.ResolveInput, output *types.ResolveOutput) {
@@ -48,7 +51,25 @@ func resolveGeoIP(resolveInput types.ResolveInput, output *types.ResolveOutput) 
 	}
 }
 
+func resolveUF(resolveInput types.ResolveInput, output *types.ResolveOutput) {
+	remoteIP, ok := resolveInput.Context["remote_ip"]
+	log.Debugf("Finding data for remote ip %s", remoteIP)
+	if !ok {
+		output.Errors["uf"] = "The context 'remote_ip' is required to resolve 'uf'"
+	} else {
+		geoRecord, err := geoIPDatabase.Find(remoteIP.(string))
+		if err != nil {
+			output.Errors["uf"] = err.Error()
+		} else {
+			output.Context["uf"] = geoRecord.State
+		}
+	}
+}
+
 func contains(s []string, searchterm string) bool {
+	if len(s) == 0 {
+		return true
+	}
 	i := sort.SearchStrings(s, searchterm)
 	return i < len(s) && s[i] == searchterm
 }
